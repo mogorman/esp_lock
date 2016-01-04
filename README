@@ -1,1 +1,3 @@
-this is some code i use to control the dead bolt in my home 
+this is some code i use to control the dead bolt in my home.
+
+It uses platformio as a build system http://platformio.org/
