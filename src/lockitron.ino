@@ -55,8 +55,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     delay(100);
     digitalWrite(PWMA,LOW);
 //    lock();
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
   } else {
     digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
   //  unlock();
