@@ -2,6 +2,7 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <math.h>
 
 #include <PubSubClient.h>
 
@@ -40,6 +41,12 @@ char msg[50];
 int value = 0;
 uint8_t lock_state;
 
+
+int16_t test_var = 0;
+int16_t toggle = 0;
+unsigned long timer = 0;
+
+
 void unlock();
 void lock();
 void reset_lock();
@@ -50,14 +57,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
  
  // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1') {
-    digitalWrite(LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    //    digitalWrite(LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
     digitalWrite(PWMA,HIGH);
     delay(100);
     digitalWrite(PWMA,LOW);
 //    lock();
   } else {
-    digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  //  unlock();
+    //    digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
+   unlock();
   }
 
 }
@@ -82,8 +89,8 @@ void setup() {
   digitalWrite(AIN2, LOW);
   digitalWrite(PWMA, LOW);
 
-  digitalWrite(LED, LOW);
-
+  //  digitalWrite(LED, LOW);
+  timer = millis();
   //reset_lock();
   
   WiFi.mode(WIFI_STA);
@@ -103,16 +110,20 @@ void setup() {
   ArduinoOTA.setPassword((const char *)"123");
   ArduinoOTA.setHostname(host);
   ArduinoOTA.onStart([]() {
-    digitalWrite(LED, LOW);
+//    digitalWrite(LED, LOW);
+     asm("nop");
   });
   ArduinoOTA.onEnd([]() {
-    digitalWrite(LED, LOW);
+//    digitalWrite(LED, LOW);
+    asm("nop");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    digitalWrite(LED,progress%2);
+//    digitalWrite(LED,progress%2);
+     asm("nop");
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    digitalWrite(LED, LOW);
+//    digitalWrite(LED, LOW);
+    asm("nop");
 //    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
 //    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
 //    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
@@ -140,7 +151,20 @@ void reconnect() {
 }
 
 void loop() {
-  ArduinoOTA.handle();
+    for(int i = 0 ; i < 10; i++) {
+       ArduinoOTA.handle();
+    }
+    if((millis() - timer) > 50) {
+      timer = millis();
+    analogWrite(LED, test_var);
+    if(test_var==1020)
+       toggle=-20;
+    if(test_var==0)
+       toggle=20;
+    test_var=test_var + toggle;
+    }
+    //    delay(10);
+    //  delay(50);
 //  if (!client.connected()) {
 //    reconnect();
 //  }
