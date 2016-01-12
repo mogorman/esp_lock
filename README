@@ -1,3 +1,5 @@
 this is some code i use to control the dead bolt in my home.
 
 It uses platformio as a build system http://platformio.org/
+
+pwming seems to work well with my motor.  i need to test with other pins
