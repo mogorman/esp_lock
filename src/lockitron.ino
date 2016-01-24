@@ -10,7 +10,7 @@
 const char* ssid = "jingle_bells";
 const char* password = "0123456789abcdef";
 const char* host = "frontdoor";
-const char* mqtt_server = "rldn.net";
+const char* mqtt_server = "home.rldn.net";
 
 #define LED 1
 
