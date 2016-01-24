@@ -87,8 +87,12 @@ void setup() {
   
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
-  digitalWrite(PWMA, LOW);
+  //  digitalWrite(PWMA, LOW);
 
+  analogWrite(PWMA, 500);
+  delay(5000);
+  analogWrite(PWMA, 0);
+  //  digitalWrite(PWMA, HIGH);
   //  digitalWrite(LED, LOW);
   timer = millis();
   //reset_lock();
@@ -156,7 +160,7 @@ void loop() {
     }
     if((millis() - timer) > 50) {
       timer = millis();
-    analogWrite(LED, test_var);
+      //    analogWrite(LED, test_var);
     if(test_var==1020)
        toggle=-20;
     if(test_var==0)
