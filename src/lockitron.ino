@@ -57,21 +57,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
  
  // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1') {
-    //    digitalWrite(LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    digitalWrite(PWMA,HIGH);
-    delay(100);
-    digitalWrite(PWMA,LOW);
-//    lock();
+    digitalWrite(LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    lock();
   } else {
-    //    digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
-   unlock();
+    digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
+    unlock();
   }
 
 }
 
 
 void setup() {
-//  Serial.begin(9600);
   pinMode(LED, OUTPUT);
   
   pinMode(AIN1, OUTPUT);
@@ -83,37 +79,25 @@ void setup() {
   pinMode(SW2A, INPUT);
   pinMode(SW2B, INPUT);
   pinMode(DOOR, INPUT_PULLUP);
-  //  Serial.println("Hello world");
-  while(1)
-{
-  if(digitalRead(SW2B)) {
-    digitalWrite(LED, HIGH);
-  } else {
-    digitalWrite(LED, LOW);
-  }
-  delay(20);
+  while(1) {
+    if(digitalRead(SW2B)) {
+      digitalWrite(LED, HIGH);
+    } else {
+      digitalWrite(LED, LOW);
+    }
+    if (digitalRead(SW1A)) {
+      digitalWrite(AIN1, HIGH);
+      digitalWrite(AIN2, LOW);
+      delay(50);
+      analogWrite(PWMA, 500);
+      delay(2000);
+      analogWrite(PWMA, 0);
+      delay(500);
+    }
+    delay(20);
  }
   
-
-  digitalWrite(LED, HIGH);
-  digitalWrite(AIN1, HIGH);
-  digitalWrite(AIN2, LOW);
-  delay(50);
-  analogWrite(PWMA, 500);
-  delay(2000);
-  analogWrite(PWMA, 0);
-  delay(500);
-  digitalWrite(AIN1, LOW);
-  digitalWrite(AIN2, HIGH);
-  delay(50);
-  analogWrite(PWMA, 500);
-  delay(2000);
-  analogWrite(PWMA, 0);
-  digitalWrite(LED, LOW);
-  //  digitalWrite(PWMA, HIGH);
-  //  digitalWrite(LED, LOW);
   timer = millis();
-  //reset_lock();
   
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -176,36 +160,29 @@ void loop() {
     for(int i = 0 ; i < 10; i++) {
        ArduinoOTA.handle();
     }
-    if((millis() - timer) > 50) {
-      timer = millis();
-      //    analogWrite(LED, test_var);
-    if(test_var==1020)
-       toggle=-20;
-    if(test_var==0)
-       toggle=20;
-    test_var=test_var + toggle;
+    if (!client.connected()) {
+      reconnect();
     }
-    //    delay(10);
-    //  delay(50);
-//  if (!client.connected()) {
-//    reconnect();
-//  }
-//  client.loop();
-//
-//  long now = millis();
-//  if (now - lastMsg > 500) {
-//      int sw1a, sw1b, sw2a, sw2b, door;
-//  sw1a = digitalRead(SW1A);
-//  sw1b = digitalRead(SW1B);
-//  sw2a = digitalRead(SW2A);
-//  sw2b = digitalRead(SW2B);
-//  door = digitalRead(DOOR);
-//    lastMsg = now;
-//    ++value;
-//    snprintf (msg, 75, "Return: #%ld: 1A=%ld 1B=%ld 2A=%ld 2B=%ld D=%ld s=%ld", value, sw1a, sw1b, sw2a, sw2b, door, lock_state);
-//    client.publish("door_out", msg);
-//  }
+    client.loop();
+
+    long now = millis();
+    if (now - lastMsg > 500) {
+      int sw1a, sw1b, sw2a, sw2b, door;
+      sw1a = digitalRead(SW1A);
+      sw1b = digitalRead(SW1B);
+      sw2a = digitalRead(SW2A);
+      sw2b = digitalRead(SW2B);
+      door = digitalRead(DOOR);
+      lastMsg = now;
+      ++value;
+      snprintf (msg, 75, "Return: #%ld: 1A=%ld 1B=%ld 2A=%ld 2B=%ld D=%ld s=%ld", value, sw1a, sw1b, sw2a, sw2b, door, lock_state);
+      client.publish("door_out", msg);
+    }
 }
+
+
+
+// move lock around
 
 void reset_lock() {
     // Move motor to reset its position
@@ -225,20 +202,19 @@ void reset_lock() {
 
 void move_motor(uint8_t dir)
 {
-  if ( dir ) {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
-  } else {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
-  }
-  //  analogWrite(PWMA, MOTOR_SPEED);
-//  digitalWrite(PWMA, HIGH);
+    if ( dir ) {
+      digitalWrite(AIN1, HIGH);
+      digitalWrite(AIN2, LOW);
+    } else {
+      digitalWrite(AIN1, LOW);
+      digitalWrite(AIN2, HIGH);
+    }
+    analogWrite(PWMA, MOTOR_SPEED);
 }
 
 void stop_motor()
 {
- // digitalWrite(PWMA, LOW);
+    analogWrite(PWMA, 0);
 }
 
 void lock()
