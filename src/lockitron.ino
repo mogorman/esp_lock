@@ -15,16 +15,16 @@ const char* mqtt_server = "home.rldn.net";
 #define LED 1
 
 #define AIN1 4
-#define AIN2 5
-#define PWMA 16
+#define AIN2 16
+#define PWMA 5
 
-#define SW1A 13
+#define SW1A 3
 #define SW1B 12
 
-#define SW2A 2
+#define SW2A 13
 #define SW2B 14
 
-#define DOOR 3
+#define DOOR A0
 
 #define LOCK_OPEN 0
 #define LOCK_CLOSED 1
@@ -71,27 +71,45 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 
 void setup() {
+//  Serial.begin(9600);
   pinMode(LED, OUTPUT);
   
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
   pinMode(PWMA, OUTPUT);
 
-  pinMode(SW1A, INPUT_PULLUP);
-  pinMode(SW1B, INPUT_PULLUP);
-  pinMode(SW2A, INPUT_PULLUP);
-  pinMode(SW2B, INPUT_PULLUP);
+  pinMode(SW1A, INPUT);
+  pinMode(SW1B, INPUT);
+  pinMode(SW2A, INPUT);
+  pinMode(SW2B, INPUT);
   pinMode(DOOR, INPUT_PULLUP);
-
-
+  //  Serial.println("Hello world");
+  while(1)
+{
+  if(digitalRead(SW2B)) {
+    digitalWrite(LED, HIGH);
+  } else {
+    digitalWrite(LED, LOW);
+  }
+  delay(20);
+ }
   
+
+  digitalWrite(LED, HIGH);
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
-  //  digitalWrite(PWMA, LOW);
-
+  delay(50);
   analogWrite(PWMA, 500);
-  delay(5000);
+  delay(2000);
   analogWrite(PWMA, 0);
+  delay(500);
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);
+  delay(50);
+  analogWrite(PWMA, 500);
+  delay(2000);
+  analogWrite(PWMA, 0);
+  digitalWrite(LED, LOW);
   //  digitalWrite(PWMA, HIGH);
   //  digitalWrite(LED, LOW);
   timer = millis();
