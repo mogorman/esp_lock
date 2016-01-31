@@ -79,23 +79,6 @@ void setup() {
   pinMode(SW2A, INPUT);
   pinMode(SW2B, INPUT);
   pinMode(DOOR, INPUT_PULLUP);
- /*  while(1) { */
- /*    if(digitalRead(SW2B)) { */
- /*      digitalWrite(LED, HIGH); */
- /*    } else { */
- /*      digitalWrite(LED, LOW); */
- /*    } */
- /*    if (digitalRead(SW1A)) { */
- /*      digitalWrite(AIN1, HIGH); */
- /*      digitalWrite(AIN2, LOW); */
- /*      delay(50); */
- /*      analogWrite(PWMA, 500); */
- /*      delay(2000); */
- /*      analogWrite(PWMA, 0); */
- /*      delay(500); */
- /*    } */
- /*    delay(20); */
- /* } */
   
   timer = millis();
   
