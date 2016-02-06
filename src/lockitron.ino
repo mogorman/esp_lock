@@ -107,11 +107,9 @@ void setup() {
     asm("nop");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-//    digitalWrite(LED,progress%2);
      asm("nop");
   });
   ArduinoOTA.onError([](ota_error_t error) {
-//    digitalWrite(LED, LOW);
     asm("nop");
 //    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
 //    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
