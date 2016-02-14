@@ -32,7 +32,7 @@ const char* mqtt_server = "home.rldn.net";
 #define MOTOR_CW 0
 #define MOTOR_CCW 1
 
-#define MOTOR_SPEED 200
+#define MOTOR_SPEED 850
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -46,9 +46,7 @@ int16_t test_var = 0;
 int16_t toggle = 0;
 unsigned long timer = 0;
 
-
-void unlock();
-void lock();
+void lock(int move_lock);
 void reset_lock();
 void stop_motor();
 void move_motor(uint8_t dir);
@@ -58,10 +56,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
  // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1') {
     digitalWrite(LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    lock();
+    lock(MOTOR_CW);
   } else {
     digitalWrite(LED, HIGH);  // Turn the LED off by making the voltage HIGH
-    unlock();
+    lock(MOTOR_CCW);
   }
 
 }
@@ -78,7 +76,7 @@ void setup() {
   pinMode(SW1B, INPUT);
   pinMode(SW2A, INPUT);
   pinMode(SW2B, INPUT);
-  pinMode(DOOR, INPUT_PULLUP);
+  pinMode(DOOR, INPUT);
   
   timer = millis();
   
@@ -153,10 +151,14 @@ void loop() {
       sw1b = digitalRead(SW1B);
       sw2a = digitalRead(SW2A);
       sw2b = digitalRead(SW2B);
-      door = digitalRead(DOOR);
+      door = analogRead(DOOR);
+      if(door > 500)
+	door = 1;
+      else
+        door = 0;
       lastMsg = now;
       ++value;
-      snprintf (msg, 75, "Return: #%ld: 1A=%ld 1B=%ld 2A=%ld 2B=%ld D=%ld s=%ld", value, sw1a, sw1b, sw2a, sw2b, door, lock_state);
+      snprintf (msg, 75, "Return! #%ld: 1A=%ld 1B=%ld 2A=%ld 2B=%ld D=%ld s=%ld", value, sw1a, sw1b, sw2a, sw2b, door, lock_state);
       client.publish("door_out", msg);
     }
 }
@@ -191,73 +193,42 @@ void move_motor(uint8_t dir)
       digitalWrite(AIN2, HIGH);
     }
     analogWrite(PWMA, MOTOR_SPEED);
-}
+ }
 
 void stop_motor()
 {
     analogWrite(PWMA, 0);
 }
 
-void lock()
+void lock(int direction)
 {
   
   int sw1a, sw1b, sw2a, sw2b;
+  int count=0;
+  long move_too_long = millis();
   // Move motor to lock the deadbolt
-  move_motor(MOTOR_CW);
+  move_motor(direction);
   do
   {
     sw1a = digitalRead(SW1A);
     sw1b = digitalRead(SW1B);
     sw2a = digitalRead(SW2A);
     sw2b = digitalRead(SW2B);
+    long now = millis();
+    if (now - move_too_long > 900) {
+      stop_motor();
+      move_too_long = now;
+      delay(30);
+      move_motor(direction);
+      count++;
+    }
+    if(count==1) {
+      break;
+    }
   }
   while ( !((sw1a == 0) && (sw1b == 1) && 
             (sw2a == 0) && (sw2b == 1)) );
   stop_motor();
   delay(100);
-  
-  // Move motor back to starting position
-  move_motor(MOTOR_CCW);
-  do
-  {
-    sw1a = digitalRead(SW1A);
-    sw1b = digitalRead(SW1B);
-    sw2a = digitalRead(SW2A);
-    sw2b = digitalRead(SW2B);
-  }
-  while ( !((sw2a == 1) && (sw2b == 1)) );
-  stop_motor();
-  lock_state = LOCK_OPEN;
-}
-
-void unlock()
-{
-  
-  int sw1a, sw1b, sw2a, sw2b;
-  // Move motor to lock the deadbolt
-  move_motor(MOTOR_CCW);
-  do
-  {
-    sw1a = digitalRead(SW1A);
-    sw1b = digitalRead(SW1B);
-    sw2a = digitalRead(SW2A);
-    sw2b = digitalRead(SW2B);
-  }
-  while ( !((sw1a == 1) && (sw1b == 0) && 
-            (sw2a == 1) && (sw2b == 0) ));
-  stop_motor();
-  delay(100);
-  
-  // Move motor back to starting position
-  move_motor(MOTOR_CW);
-  do
-  {
-    sw1a = digitalRead(SW1A);
-    sw1b = digitalRead(SW1B);
-    sw2a = digitalRead(SW2A);
-    sw2b = digitalRead(SW2B);
-  }
-  while ( !((sw2a == 1) && (sw2b == 1)) );
-  stop_motor();
-  lock_state = LOCK_CLOSED;
+  lock_state = direction;
 }
